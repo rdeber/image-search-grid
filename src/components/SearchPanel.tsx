@@ -1,21 +1,15 @@
 import React, { useState, useEffect, ReactElement, useRef } from 'react';
 import {
-  AppBar,
-  Toolbar,
   Card,
   CardActionArea,
   CardMedia,
   CardContent,
   Typography,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Button,
-  Chip,
   Box,
 } from '@mui/material';
-import ClearIcon from '@mui/icons-material/Clear';
 import Masonry from '@mui/lab/Masonry';
+import FilterChips from './FilterChips';
+import SearchBar from './SearchBar';
 
 interface IPhotoProps {
   alt_description?: string;
@@ -42,89 +36,68 @@ const PhotoGrid = ({
   const filters = ['Nature', 'Food', 'Travel', 'Animals', 'Technology', 'Coke'];
 
   useEffect(() => {
+    // Define an asynchronous function to fetch photos
     const fetchPhotos = async () => {
       try {
+        // Make an API request to fetch photos based on the query
         const response = await fetch(
-          `https://api.unsplash.com/search/photos/?client_id=Js4RVQ76R2SGGiBp3CMa_w55ERNVC6lQXMv_qF5_2zc&query=${query}&per_page=25`
+          `https://api.unsplash.com/search/photos/`
         );
+
+        // Parse the response as JSON
         const data = await response.json();
+
+        // Update the photos state with the fetched results
         setPhotos(data.results);
       } catch (error) {
         console.error('Error fetching photos', error);
       }
     };
+
+    // Only fetch photos when the query changes
     if (query !== '') {
       fetchPhotos();
     }
   }, [query]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Update the query state with the value from the input field
     setQuery(event.target.value);
   };
 
   const handleSearchClick = () => {
     if (searchInputRef.current) {
+      // Update the query state with the value from the input field
       setQuery(searchInputRef.current.value);
     }
   };
 
   const handleFilterClick = (filter: string) => {
+    // Update the query state with the selected filter value
     setQuery(filter);
   };
 
   const handleClearClick = () => {
+    // Clear the query state
     setQuery('');
   };
 
   return (
     <>
-      <AppBar position="sticky" sx={{ backgroundColor: 'background.paper' }}>
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <TextField
-              label="Search"
-              variant="outlined"
-              margin="normal"
-              value={query}
-              onChange={handleSearchChange}
-              InputProps={{
-                id: 'search-input',
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="Clear search"
-                      onClick={handleClearClick}
-                      edge="end"
-                    >
-                      <ClearIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSearchClick}
-              sx={{ marginInlineStart: 1 }}
-            >
-              Search
-            </Button>
-          </Box>
-        </Toolbar>
-        <Box sx={{ m: 2 }}>
-          {filters.map((filter) => (
-            <Chip
-              key={filter}
-              label={filter}
-              onClick={() => handleFilterClick(filter)}
-              sx={{ mx: 1 }}
-            />
-          ))}
-        </Box>
-      </AppBar>
+      {/* Render the SearchBar component */}
+      <SearchBar
+        query={query}
+        onSearchChange={handleSearchChange}
+        onSearchClick={handleSearchClick}
+        onClearClick={handleClearClick}
+      />
+
+      {/* Render the FilterChips component */}
+      <FilterChips filters={filters} onFilterClick={handleFilterClick} />
+
       <Box sx={{ m: 2 }}>
         <Masonry columns={{ xs: 1, sm: 2, md: 3, lg: 4 }} spacing={2}>
+          {/* Render the photo cards based on the photos array */}
           {photos.map((photo, index) => (
             <Card key={index}>
               <CardActionArea>
